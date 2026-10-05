@@ -55,9 +55,21 @@ export async function initializeDatabase() {
     );
   `);
 
+  // Earlier app launches could insert the same seed events repeatedly.
+  // Keep one row per event ID before enforcing uniqueness for future inserts.
+  await db.runAsync(`
+    DELETE FROM events
+    WHERE rowId NOT IN (
+      SELECT MIN(rowId) FROM events GROUP BY id
+    )
+  `);
+  await db.execAsync(
+    'CREATE UNIQUE INDEX IF NOT EXISTS events_id_unique ON events(id)'
+  );
+
   for (const event of seedEvents) {
     await db.runAsync(
-      `INSERT INTO events
+      `INSERT OR IGNORE INTO events
         (id, title, description, startsAt, endsAt, category, location, room, capacity, registeredCount, tags)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       event.id,
