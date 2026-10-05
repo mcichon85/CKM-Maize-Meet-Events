@@ -10,22 +10,42 @@ export default function NotesScreen({ navigation, route }) {
   const { eventId, eventTitle } = route.params;
   const [note, setNote] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [saveState, setSaveState] = useState('saved');
   const timer = useRef(null);
 
   useEffect(() => {
     getNote(eventId)
       .then((stored) => setNote(stored?.body || ''))
+      .catch(() => setSaveState('error'))
       .finally(() => setLoaded(true));
   }, [eventId]);
 
+  async function persistNote() {
+    clearTimeout(timer.current);
+    setSaveState('saving');
+    try {
+      await saveNote(eventId, note);
+      setSaveState('saved');
+    } catch {
+      setSaveState('error');
+    }
+  }
+
   useEffect(() => {
     if (!loaded) return;
+    setSaveState('unsaved');
     timer.current = setTimeout(() => {
-      saveNote(eventId, note)
-        .catch(() => {});
+      persistNote();
     }, 700);
     return () => clearTimeout(timer.current);
-  }, [note]);
+  }, [eventId, loaded, note]);
+
+  const saveLabel = {
+    error: 'Save failed',
+    saved: 'Saved',
+    saving: 'Saving…',
+    unsaved: 'Save',
+  }[saveState];
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
@@ -38,7 +58,9 @@ export default function NotesScreen({ navigation, route }) {
             <MaterialCommunityIcons color={colors.blue} name="arrow-left" size={25} />
           </Pressable>
           <Text style={styles.headerTitle}>Private note</Text>
-          <View style={styles.backButton} />
+          <Pressable accessibilityRole="button" onPress={persistNote} style={styles.saveButton}>
+            <Text style={styles.saveButtonText}>{saveLabel}</Text>
+          </Pressable>
         </View>
         <View style={styles.content}>
           <Text style={styles.eyebrow}>NOTE FOR</Text>
@@ -65,6 +87,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 7 },
   backButton: { alignItems: 'center', height: 38, justifyContent: 'center', width: 38 },
+  saveButton: { alignItems: 'center', justifyContent: 'center', minHeight: 38, minWidth: 58 },
+  saveButtonText: { color: colors.blue, fontSize: 14, fontWeight: '800' },
   headerTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
   content: { flex: 1, paddingHorizontal: 22, paddingTop: 28 },
   eyebrow: { color: colors.blueLight, fontSize: 11, fontWeight: '800', letterSpacing: 1.3 },
