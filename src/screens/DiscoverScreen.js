@@ -30,11 +30,11 @@ export default function DiscoverScreen({ navigation }) {
     return [...events]
       .sort((left, right) => new Date(left.startsAt) - new Date(right.startsAt))
       .filter((event) => {
-      const matchesSearch = !query || event.title.includes(query);
-      const matchesCategory =
-        selectedCategory === 'All' || event.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
+        const matchesSearch = !query || event.title.includes(query);
+        const matchesCategory =
+          selectedCategory === 'All' || event.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
   }, [events, query]);
 
   async function handleRefresh() {
@@ -101,7 +101,7 @@ export default function DiscoverScreen({ navigation }) {
         data={filteredEvents}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         keyExtractor={(_, index) => String(index)}
-        ListEmptyComponent={filteredEvents.length === 0 && !refreshing ? (
+        ListEmptyComponent={filteredEvents.length === 0 && !refreshing && !refreshError ? (
           <EmptyState
             actionLabel="Clear filters"
             message="Try another search or browse every category."
