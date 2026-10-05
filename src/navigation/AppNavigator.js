@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -23,7 +23,6 @@ const icons = {
 function MainTabs() {
   const { savedEventIds, preferences } = useAppContext();
   const palette = getAppColors(preferences.darkTheme);
-  const [savedCount] = useState(savedEventIds.length);
 
   return (
     <Tabs.Navigator
@@ -46,7 +45,7 @@ function MainTabs() {
       <Tabs.Screen
         name="Saved"
         component={SavedScreen}
-        options={{ tabBarBadge: savedCount || undefined }}
+        options={{ tabBarBadge: savedEventIds.length || undefined }}
       />
       <Tabs.Screen name="Settings" component={SettingsScreen} />
     </Tabs.Navigator>

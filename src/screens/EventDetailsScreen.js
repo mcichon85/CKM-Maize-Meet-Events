@@ -11,33 +11,34 @@ import { formatFullEventDate } from '../utils/date';
 import { getAppColors } from '../theme/theme';
 
 export default function EventDetailsScreen({ navigation, route }) {
-  const { savedEventIds, toggleSaved, preferences } = useAppContext();
+  const { events, savedEventIds, toggleSaved, preferences } = useAppContext();
   const palette = getAppColors(preferences.darkTheme);
   const styles = createStyles(palette);
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [saved, setSaved] = useState(false);
   const tags = Array.isArray(event?.tags) ? event.tags : [];
 
   useEffect(() => {
     async function loadEvent() {
-      const selected = await getEvent(route.params?.eventId);
+      const selected = route.params?.eventIndex !== undefined
+        ? events[route.params.eventIndex]
+        : await getEvent(route.params?.eventId);
       setEvent(selected);
       if (selected) {
-        setSaved(savedEventIds.includes(selected.id));
         setRegistered(await isRegistered(selected.id));
       }
       setLoading(false);
     }
     loadEvent();
-  }, [route.params?.eventId]);
+  }, [events, route.params?.eventId, route.params?.eventIndex]);
 
   async function handleSave() {
-    const next = await toggleSaved(event.id);
-    setSaved(next);
+    await toggleSaved(event.id);
   }
+
+  const saved = event ? savedEventIds.includes(event.id) : false;
 
   async function handleRegister() {
     setRegistering(true);
@@ -70,9 +71,13 @@ export default function EventDetailsScreen({ navigation, route }) {
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <View style={styles.navBar}>
         <Pressable
-          onPress={() =>
-            route.params.source ? navigation.goBack() : navigation.navigate(route.params.source)
-          }
+          onPress={() => {
+            if (typeof route.params?.source === 'string') {
+              navigation.navigate(route.params.source);
+              return;
+            }
+            navigation.goBack();
+          }}
           style={styles.navButton}
         >
           <MaterialCommunityIcons color={palette.primary} name="arrow-left" size={25} />
