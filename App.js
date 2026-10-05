@@ -13,7 +13,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { AppContextProvider, useAppContext } from './src/context/AppContext';
 import { initializeDatabase } from './src/db/database';
 import { restoreSession } from './src/services/session';
-import { appTheme, colors } from './src/theme/theme';
+import { colors, getAppTheme } from './src/theme/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -30,14 +30,14 @@ const darkNavigationTheme = {
 function AppContent({ initialSession }) {
   const { preferences } = useAppContext();
   return (
-    <>
+    <ThemeProvider theme={getAppTheme(preferences.darkTheme)}>
       <StatusBar style={preferences.darkTheme ? 'light' : 'dark'} />
       <NavigationContainer
         theme={preferences.darkTheme ? darkNavigationTheme : NavigationDefaultTheme}
       >
         <AppNavigator initialSession={initialSession} />
       </NavigationContainer>
-    </>
+    </ThemeProvider>
   );
 }
 
@@ -64,11 +64,9 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider theme={appTheme}>
-        <AppContextProvider initialSession={initialSession}>
-          <AppContent initialSession={initialSession} />
-        </AppContextProvider>
-      </ThemeProvider>
+      <AppContextProvider initialSession={initialSession}>
+        <AppContent initialSession={initialSession} />
+      </AppContextProvider>
     </SafeAreaProvider>
   );
 }

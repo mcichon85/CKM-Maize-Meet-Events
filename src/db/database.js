@@ -27,7 +27,7 @@ export async function initializeDatabase() {
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS events (
       rowId INTEGER PRIMARY KEY AUTOINCREMENT,
-      id TEXT NOT NULL,
+      id TEXT NOT NULL UNIQUE,
       title TEXT NOT NULL,
       description TEXT NOT NULL,
       startsAt TEXT NOT NULL,
@@ -41,7 +41,7 @@ export async function initializeDatabase() {
     );
     CREATE TABLE IF NOT EXISTS saved_events (
       rowId INTEGER PRIMARY KEY AUTOINCREMENT,
-      eventId TEXT NOT NULL
+      eventId TEXT NOT NULL UNIQUE
     );
     CREATE TABLE IF NOT EXISTS notes (
       eventId TEXT PRIMARY KEY,
@@ -55,9 +55,20 @@ export async function initializeDatabase() {
     );
   `);
 
+  // Older installations seeded the same IDs on each launch. Keep one row per
+  // event before adding indexes that prevent the issue from returning.
+  await db.execAsync(`
+    DELETE FROM events
+    WHERE rowId NOT IN (SELECT MIN(rowId) FROM events GROUP BY id);
+    DELETE FROM saved_events
+    WHERE rowId NOT IN (SELECT MIN(rowId) FROM saved_events GROUP BY eventId);
+    CREATE UNIQUE INDEX IF NOT EXISTS events_id_unique ON events(id);
+    CREATE UNIQUE INDEX IF NOT EXISTS saved_events_event_id_unique ON saved_events(eventId);
+  `);
+
   for (const event of seedEvents) {
     await db.runAsync(
-      `INSERT INTO events
+      `INSERT OR IGNORE INTO events
         (id, title, description, startsAt, endsAt, category, location, room, capacity, registeredCount, tags)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       event.id,
@@ -78,7 +89,7 @@ export async function initializeDatabase() {
 function mapEvent(row) {
   return {
     ...row,
-    tags: row.tags ? JSON.parse(row.tags) : undefined,
+    tags: row.tags ? JSON.parse(row.tags) : [],
   };
 }
 
