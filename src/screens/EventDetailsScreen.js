@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Chip, Text } from '@rneui/themed';
@@ -6,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CapacityBadge from '../components/CapacityBadge';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { useAppContext } from '../context/AppContext';
-import { getEvent, isRegistered, registerForEvent } from '../db/database';
+import { getEvent, getNote, isRegistered, registerForEvent } from '../db/database';
 import { formatFullEventDate } from '../utils/date';
 import { colors } from '../theme/theme';
 
@@ -17,6 +18,7 @@ export default function EventDetailsScreen({ navigation, route }) {
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [note, setNote] = useState('');
 
   useEffect(() => {
     async function loadEvent() {
@@ -32,6 +34,24 @@ export default function EventDetailsScreen({ navigation, route }) {
     }
     loadEvent();
   }, [route.params?.eventId, route.params?.eventIndex]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let active = true;
+      if (event?.id) {
+        getNote(event.id)
+          .then((stored) => {
+            if (active) setNote(stored?.body || '');
+          })
+          .catch(() => {
+            if (active) setNote('');
+          });
+      }
+      return () => {
+        active = false;
+      };
+    }, [event?.id])
+  );
 
   async function handleSave() {
     const next = await toggleSaved(event.id);
@@ -131,7 +151,9 @@ export default function EventDetailsScreen({ navigation, route }) {
           </View>
           <View style={styles.noteCopy}>
             <Text style={styles.noteTitle}>Private note</Text>
-            <Text style={styles.noteDescription}>Add a reminder or thought about this event.</Text>
+            <Text numberOfLines={2} style={styles.noteDescription}>
+              {note || 'Add a reminder or thought about this event.'}
+            </Text>
           </View>
           <MaterialCommunityIcons color={colors.muted} name="chevron-right" size={24} />
         </Pressable>
