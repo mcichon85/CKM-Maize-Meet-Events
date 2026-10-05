@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Card, Text } from '@rneui/themed';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatEventDate, formatEventTime } from '../utils/date';
 import { colors } from '../theme/theme';
 
-export default function EventCard({ event, initiallySaved, onPress, onToggleSaved }) {
-  const [saved, setSaved] = useState(initiallySaved);
-
+export default function EventCard({ event, isSaved, onPress, onToggleSaved }) {
   async function handleSavedPress() {
-    setSaved((current) => !current);
-    const next = await onToggleSaved(event.id);
-    setSaved(next);
+    await onToggleSaved(event.id);
   }
 
   return (
@@ -21,8 +17,8 @@ export default function EventCard({ event, initiallySaved, onPress, onToggleSave
           <Text style={styles.category}>{event.category.toUpperCase()}</Text>
           <Pressable hitSlop={4} onPress={handleSavedPress} style={styles.heartButton}>
             <MaterialCommunityIcons
-              color={saved ? '#C6253D' : colors.muted}
-              name={saved ? 'heart' : 'heart-outline'}
+              color={isSaved ? '#C6253D' : colors.muted}
+              name={isSaved ? 'heart' : 'heart-outline'}
               size={22}
             />
           </Pressable>

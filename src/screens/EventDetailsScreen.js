@@ -16,7 +16,6 @@ export default function EventDetailsScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     async function loadEvent() {
@@ -25,7 +24,6 @@ export default function EventDetailsScreen({ navigation, route }) {
         : await getEvent(route.params?.eventId);
       setEvent(selected);
       if (selected) {
-        setSaved(savedEventIds.includes(selected.id));
         setRegistered(await isRegistered(selected.id));
       }
       setLoading(false);
@@ -34,9 +32,10 @@ export default function EventDetailsScreen({ navigation, route }) {
   }, [route.params?.eventId, route.params?.eventIndex]);
 
   async function handleSave() {
-    const next = await toggleSaved(event.id);
-    setSaved(next);
+    await toggleSaved(event.id);
   }
+
+  const saved = event ? savedEventIds.includes(event.id) : false;
 
   async function handleRegister() {
     setRegistering(true);

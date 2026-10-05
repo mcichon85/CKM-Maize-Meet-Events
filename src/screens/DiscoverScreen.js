@@ -111,7 +111,7 @@ export default function DiscoverScreen({ navigation }) {
         renderItem={({ item }) => (
           <EventCard
             event={item}
-            initiallySaved={savedEventIds.includes(item.id)}
+            isSaved={savedEventIds.includes(item.id)}
             onPress={() =>
               navigation.navigate('EventDetails', {
                 eventId: item.id,
