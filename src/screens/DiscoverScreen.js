@@ -115,7 +115,6 @@ export default function DiscoverScreen({ navigation }) {
             onPress={() =>
               navigation.navigate('EventDetails', {
                 eventId: item.id,
-                source: 'Discover',
               })
             }
             onToggleSaved={toggleSaved}
