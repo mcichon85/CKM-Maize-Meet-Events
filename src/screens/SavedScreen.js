@@ -5,10 +5,12 @@ import { Text } from '@rneui/themed';
 import EventCard from '../components/EventCard';
 import EmptyState from '../components/EmptyState';
 import { useAppContext } from '../context/AppContext';
-import { colors } from '../theme/theme';
+import { getAppColors } from '../theme/theme';
 
 export default function SavedScreen({ navigation }) {
-  const { events, savedEventIds, toggleSaved } = useAppContext();
+  const { events, savedEventIds, toggleSaved, preferences } = useAppContext();
+  const palette = getAppColors(preferences.darkTheme);
+  const styles = createStyles(palette);
   const displayedEvents = events
     .filter((event) => savedEventIds.includes(event.id))
     .sort((left, right) => new Date(left.startsAt) - new Date(right.startsAt));
@@ -43,11 +45,11 @@ export default function SavedScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.cream, flex: 1 },
+const createStyles = (palette) => StyleSheet.create({
+  safeArea: { backgroundColor: palette.background, flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 16 },
-  heading: { color: colors.blue, fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
-  subheading: { color: colors.muted, marginTop: 3 },
+  heading: { color: palette.primary, fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
+  subheading: { color: palette.muted, marginTop: 3 },
   list: { paddingBottom: 28, paddingHorizontal: 20, paddingTop: 18 },
   emptyList: { flexGrow: 1 },
   separator: { height: 12 },

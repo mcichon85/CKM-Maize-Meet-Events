@@ -3,9 +3,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Card, Text } from '@rneui/themed';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatEventDate, formatEventTime } from '../utils/date';
-import { colors } from '../theme/theme';
+import { getAppColors } from '../theme/theme';
+import { useAppContext } from '../context/AppContext';
 
 export default function EventCard({ event, isSaved, onPress, onToggleSaved }) {
+  const { preferences } = useAppContext();
+  const palette = getAppColors(preferences.darkTheme);
+  const styles = createStyles(palette);
   async function handleSavedPress() {
     await onToggleSaved(event.id);
   }
@@ -17,7 +21,7 @@ export default function EventCard({ event, isSaved, onPress, onToggleSaved }) {
           <Text style={styles.category}>{event.category.toUpperCase()}</Text>
           <Pressable hitSlop={4} onPress={handleSavedPress} style={styles.heartButton}>
             <MaterialCommunityIcons
-              color={isSaved ? '#C6253D' : colors.muted}
+              color={isSaved ? '#C6253D' : palette.muted}
               name={isSaved ? 'heart' : 'heart-outline'}
               size={22}
             />
@@ -35,21 +39,21 @@ export default function EventCard({ event, isSaved, onPress, onToggleSaved }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surface,
     elevation: 1,
     height: 174,
     padding: 18,
-    shadowColor: '#102B44',
+    shadowColor: '#000000',
     shadowOpacity: 0.08,
     shadowRadius: 12,
   },
   pressed: { opacity: 0.78 },
   topRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
-  category: { color: colors.blueLight, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  category: { color: palette.secondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
   heartButton: { alignItems: 'center', height: 28, justifyContent: 'center', width: 28 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: '800', marginTop: 2 },
-  date: { color: colors.blue, fontSize: 14, fontWeight: '700', marginTop: 8 },
-  meta: { color: colors.muted, fontSize: 13, marginTop: 3 },
+  title: { color: palette.text, fontSize: 20, fontWeight: '800', marginTop: 2 },
+  date: { color: palette.primary, fontSize: 14, fontWeight: '700', marginTop: 8 },
+  meta: { color: palette.muted, fontSize: 13, marginTop: 3 },
 });

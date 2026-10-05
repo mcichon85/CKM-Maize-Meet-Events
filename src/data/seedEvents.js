@@ -75,6 +75,7 @@ export const seedEvents = [
     room: 'Assembly Hall',
     capacity: 90,
     registeredCount: 63,
+    tags: ['graduate students', 'networking'],
   },
   {
     id: 'evt-007',
