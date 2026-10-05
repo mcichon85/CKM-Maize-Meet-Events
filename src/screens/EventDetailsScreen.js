@@ -90,7 +90,7 @@ export default function EventDetailsScreen({ navigation, route }) {
       <View style={styles.navBar}>
         <Pressable
           onPress={() =>
-            route.params.source ? navigation.goBack() : navigation.navigate(route.params.source)
+            navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Main')
           }
           style={styles.navButton}
         >
