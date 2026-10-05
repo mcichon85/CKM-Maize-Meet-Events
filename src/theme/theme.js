@@ -11,6 +11,36 @@ export const colors = {
   danger: '#B42318',
 };
 
+const darkColors = {
+  primary: colors.maize,
+  secondary: '#8EBCE6',
+  background: '#101820',
+  surface: '#17212B',
+  text: '#F7F4ED',
+  muted: '#B4C0CA',
+  border: '#405468',
+  subtle: '#253443',
+  onPrimary: '#17212B',
+  danger: '#FFB4AB',
+};
+
+const lightPalette = {
+  primary: colors.blue,
+  secondary: colors.blueLight,
+  background: colors.cream,
+  surface: '#FFFFFF',
+  text: colors.ink,
+  muted: colors.muted,
+  border: colors.border,
+  subtle: '#EDF1F4',
+  onPrimary: '#FFFFFF',
+  danger: colors.danger,
+};
+
+export function getAppColors(isDark) {
+  return isDark ? darkColors : lightPalette;
+}
+
 export const appTheme = createTheme({
   lightColors: {
     primary: colors.blue,
@@ -23,14 +53,14 @@ export const appTheme = createTheme({
     grey5: colors.border,
   },
   darkColors: {
-    primary: colors.maize,
-    secondary: colors.blueLight,
-    background: '#101820',
-    white: '#17212B',
-    black: '#F7F4ED',
-    grey0: '#F7F4ED',
-    grey3: '#66717C',
-    grey5: '#253443',
+    primary: darkColors.primary,
+    secondary: darkColors.secondary,
+    background: darkColors.background,
+    white: darkColors.onPrimary,
+    black: darkColors.text,
+    grey0: darkColors.text,
+    grey3: darkColors.muted,
+    grey5: darkColors.border,
   },
   mode: 'light',
   components: {
@@ -47,3 +77,7 @@ export const appTheme = createTheme({
     },
   },
 });
+
+export function getAppTheme(isDark) {
+  return { ...appTheme, mode: isDark ? 'dark' : 'light' };
+}

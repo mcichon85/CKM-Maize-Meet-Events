@@ -7,10 +7,12 @@ import EmptyState from '../components/EmptyState';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { getSavedEvents } from '../db/database';
 import { useAppContext } from '../context/AppContext';
-import { colors } from '../theme/theme';
+import { getAppColors } from '../theme/theme';
 
 export default function SavedScreen({ navigation }) {
-  const { savedEventIds, toggleSaved } = useAppContext();
+  const { savedEventIds, toggleSaved, preferences } = useAppContext();
+  const palette = getAppColors(preferences.darkTheme);
+  const styles = createStyles(palette);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,11 +60,11 @@ export default function SavedScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.cream, flex: 1 },
+const createStyles = (palette) => StyleSheet.create({
+  safeArea: { backgroundColor: palette.background, flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 16 },
-  heading: { color: colors.blue, fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
-  subheading: { color: colors.muted, marginTop: 3 },
+  heading: { color: palette.primary, fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
+  subheading: { color: palette.muted, marginTop: 3 },
   list: { paddingBottom: 28, paddingHorizontal: 20, paddingTop: 18 },
   emptyList: { flexGrow: 1 },
   separator: { height: 12 },
