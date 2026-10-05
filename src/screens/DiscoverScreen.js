@@ -27,8 +27,9 @@ export default function DiscoverScreen({ navigation }) {
   const [refreshError, setRefreshError] = useState('');
 
   const filteredEvents = useMemo(() => {
-    events.sort((left, right) => new Date(left.startsAt) - new Date(right.startsAt));
-    return events.filter((event) => {
+    return [...events]
+      .sort((left, right) => new Date(left.startsAt) - new Date(right.startsAt))
+      .filter((event) => {
       const matchesSearch = !query || event.title.includes(query);
       const matchesCategory =
         selectedCategory === 'All' || event.category === selectedCategory;
@@ -39,13 +40,13 @@ export default function DiscoverScreen({ navigation }) {
   async function handleRefresh() {
     setRefreshing(true);
     setRefreshError('');
-    setEvents([]);
     try {
       const nextEvents = await refreshEvents();
       setEvents(nextEvents);
-      setRefreshing(false);
     } catch (error) {
-      setRefreshError(error.message);
+      setRefreshError(error?.message || 'Could not refresh events. Please try again.');
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -100,14 +101,14 @@ export default function DiscoverScreen({ navigation }) {
         data={filteredEvents}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         keyExtractor={(_, index) => String(index)}
-        ListEmptyComponent={
+        ListEmptyComponent={filteredEvents.length === 0 && !refreshing ? (
           <EmptyState
             actionLabel="Clear filters"
             message="Try another search or browse every category."
             onAction={clearFilters}
             title="No events found"
           />
-        }
+        ) : null}
         refreshControl={<RefreshControl onRefresh={handleRefresh} refreshing={refreshing} />}
         renderItem={({ item, index }) => (
           <EventCard
