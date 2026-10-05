@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@rneui/themed';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,8 +19,19 @@ export default function NotesScreen({ navigation, route }) {
   useEffect(() => {
     getNote(eventId)
       .then((stored) => setNote(stored?.body || ''))
+      .catch(() => {})
       .finally(() => setLoaded(true));
   }, [eventId]);
+
+  async function handleSave() {
+    clearTimeout(timer.current);
+    try {
+      await saveNote(eventId, note);
+      navigation.goBack();
+    } catch {
+      Alert.alert('Unable to save note', 'Please try again.');
+    }
+  }
 
   useEffect(() => {
     if (!loaded) return;
@@ -29,7 +40,7 @@ export default function NotesScreen({ navigation, route }) {
         .catch(() => {});
     }, 700);
     return () => clearTimeout(timer.current);
-  }, [note]);
+  }, [eventId, loaded, note]);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
@@ -59,6 +70,11 @@ export default function NotesScreen({ navigation, route }) {
             value={note}
           />
         </View>
+        <View style={styles.footer}>
+          <Pressable accessibilityRole="button" onPress={handleSave} style={styles.saveButton}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -70,6 +86,9 @@ const createStyles = (palette) => StyleSheet.create({
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 7 },
   backButton: { alignItems: 'center', height: 38, justifyContent: 'center', width: 38 },
   headerTitle: { color: palette.text, fontSize: 16, fontWeight: '800' },
+  footer: { paddingHorizontal: 22, paddingTop: 12 },
+  saveButton: { alignItems: 'center', backgroundColor: palette.primary, borderRadius: 12, justifyContent: 'center', minHeight: 52, width: '100%' },
+  saveButtonText: { color: palette.onPrimary, fontSize: 16, fontWeight: '800' },
   content: { flex: 1, paddingHorizontal: 22, paddingTop: 28 },
   eyebrow: { color: palette.secondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.3 },
   eventTitle: { color: palette.primary, fontSize: 25, fontWeight: '900', lineHeight: 30, marginTop: 6 },
